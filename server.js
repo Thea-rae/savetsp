@@ -85,6 +85,23 @@ app.post('/api/messages/:id/upvote', (req, res) => {
   res.json(msg);
 });
 
+// Admin: delete a message (requires ADMIN_KEY env var)
+app.delete('/api/messages/:id', (req, res) => {
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey) return res.status(403).json({ error: 'ADMIN_KEY not configured' });
+
+  const provided = req.headers['x-admin-key'];
+  if (provided !== adminKey) return res.status(401).json({ error: 'Invalid admin key' });
+
+  const idx = messages.findIndex(m => m.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+
+  messages.splice(idx, 1);
+  saveMessages();
+  broadcast('delete', { id: req.params.id });
+  res.json({ deleted: req.params.id });
+});
+
 app.listen(PORT, () => {
-  console.log(`\n  CB3 Community Voice Board is live at:\n  http://localhost:${PORT}\n`);
+  console.log(`\n  Save TSP Community Voice Board is live at:\n  http://localhost:${PORT}\n`);
 });

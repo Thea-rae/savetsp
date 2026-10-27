@@ -351,6 +351,11 @@ es.addEventListener('new-message', e => {
     render();
   }
 });
+es.addEventListener('delete', e => {
+  const { id } = JSON.parse(e.data);
+  messages = messages.filter(m => m.id !== id);
+  render();
+});
 es.addEventListener('upvote', e => {
   const { id, upvotes, upvoters } = JSON.parse(e.data);
   const msg = messages.find(m => m.id === id);
