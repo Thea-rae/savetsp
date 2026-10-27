@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CB3 Community Voice Board</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --accent: #4f8cff;
+    --accent2: #6c5ce7;
+    --text: #e8eaed;
+    --text2: #9ca3af;
+    --border: #2d3242;
+    --green: #34d399;
+    --orange: #fb923c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #1e2336 0%, #161929 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .header h1 span { color: var(--accent); }
+  .header .meta {
+    font-size: 0.8rem;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+  .header .live-badge {
+    display: inline-block;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse 2s infinite;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  /* Compose */
+  .compose {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .compose-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .compose-row input, .compose-row select {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+  }
+  .compose-row input:focus, .compose-row select:focus,
+  .compose textarea:focus {
+    border-color: var(--accent);
+  }
+  .compose textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    min-height: 80px;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+  }
+  .compose-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+  }
+  .compose-footer .char-count {
+    font-size: 0.75rem;
+    color: var(--text2);
+  }
+  .send-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .send-btn:hover { opacity: 0.9; }
+  .send-btn:active { transform: scale(0.97); }
+  .send-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-bar .sort-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.35rem 0.85rem;
+    color: var(--text2);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-bar .sort-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .msg-count {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text2);
+  }
+
+  /* Messages */
+  .messages { display: flex; flex-direction: column; gap: 0.65rem; }
+  .msg {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    transition: border-color 0.2s;
+    animation: slideIn 0.25s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg:hover { border-color: #3d4358; }
+  .msg-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+  }
+  .msg-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .msg-topic {
+    font-size: 0.7rem;
+    background: var(--surface2);
+    color: var(--accent);
+    padding: 0.15rem 0.55rem;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .msg-text {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: #d1d5db;
+    margin-bottom: 0.6rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .msg-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .msg-time {
+    font-size: 0.75rem;
+    color: var(--text2);
+  }
+  .upvote-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.3rem 0.75rem;
+    color: var(--text2);
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.15s;
+  }
+  .upvote-btn:hover { border-color: var(--green); color: var(--green); }
+  .upvote-btn.voted { border-color: var(--green); color: var(--green); background: rgba(52,211,153,0.1); }
+  .upvote-btn .arrow { font-size: 1rem; line-height: 1; }
+
+  .empty-state {
+    text-align: center;
+    color: var(--text2);
+    padding: 3rem 1rem;
+    font-size: 0.95rem;
+  }
+  .empty-state .big { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  @media (max-width: 500px) {
+    .compose-row { flex-direction: column; }
+    .header h1 { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>CB3</span> Community Voice Board <span class="live-badge">Live</span></h1>
+  <div class="meta">
+    Full Board Meeting &middot; Tues Oct 27, 2026 &middot; 6:30 PM<br>
+    PS 20 &mdash; 166 Essex Street &middot; Share your voice even if chat is off
+  </div>
+</div>
+
+<div class="container">
+  <div class="compose">
+    <div class="compose-row">
+      <input type="text" id="nameInput" placeholder="Your name (optional)" maxlength="60">
+      <select id="topicSelect">
+        <option value="General">General Comment</option>
+        <option value="Housing">Housing</option>
+        <option value="Zoning">Zoning / Land Use</option>
+        <option value="Transportation">Transportation</option>
+        <option value="Public Safety">Public Safety</option>
+        <option value="Parks">Parks / Environment</option>
+        <option value="Budget">Budget</option>
+        <option value="Education">Education</option>
+        <option value="Health">Health / Social Services</option>
+        <option value="Question">Question for the Board</option>
+      </select>
+    </div>
+    <textarea id="textInput" placeholder="What do you want the board to hear tonight?" maxlength="1000"></textarea>
+    <div class="compose-footer">
+      <span class="char-count"><span id="charCount">0</span>/1000</span>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Post Message</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="sort-btn active" data-sort="newest" onclick="setSort('newest')">Newest</button>
+    <button class="sort-btn" data-sort="top" onclick="setSort('top')">Most Supported</button>
+    <span class="msg-count" id="msgCount"></span>
+  </div>
+
+  <div class="messages" id="messageList">
+    <div class="empty-state">
+      <div class="big">&#x1F4AC;</div>
+      Be the first to share your voice tonight.
+    </div>
+  </div>
+</div>
+
+<script>
+const VOTER_ID = localStorage.getItem('voterId') || (() => { const id = crypto.randomUUID(); localStorage.setItem('voterId', id); return id; })();
+let messages = [];
+let sortMode = 'newest';
+let savedName = localStorage.getItem('cb3name') || '';
+document.getElementById('nameInput').value = savedName;
+
+// Load existing messages
+fetch('/api/messages').then(r => r.json()).then(data => {
+  messages = data;
+  render();
+});
+
+// SSE real-time
+const es = new EventSource('/api/stream');
+es.addEventListener('new-message', e => {
+  const msg = JSON.parse(e.data);
+  if (!messages.find(m => m.id === msg.id)) {
+    messages.push(msg);
+    render();
+  }
+});
+es.addEventListener('upvote', e => {
+  const { id, upvotes, upvoters } = JSON.parse(e.data);
+  const msg = messages.find(m => m.id === id);
+  if (msg) { msg.upvotes = upvotes; msg.upvoters = upvoters; render(); }
+});
+
+function render() {
+  const list = document.getElementById('messageList');
+  const count = document.getElementById('msgCount');
+  count.textContent = `${messages.length} message${messages.length !== 1 ? 's' : ''}`;
+
+  if (messages.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="big">&#x1F4AC;</div>Be the first to share your voice tonight.</div>';
+    return;
+  }
+
+  const sorted = [...messages].sort((a, b) => {
+    if (sortMode === 'top') return b.upvotes - a.upvotes || b.timestamp - a.timestamp;
+    return b.timestamp - a.timestamp;
+  });
+
+  list.innerHTML = sorted.map(m => {
+    const voted = m.upvoters && m.upvoters.includes(VOTER_ID);
+    const time = new Date(m.timestamp);
+    const timeStr = time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return `<div class="msg" id="msg-${m.id}">
+      <div class="msg-top">
+        <span class="msg-name">${esc(m.name)}</span>
+        <span class="msg-topic">${esc(m.topic)}</span>
+      </div>
+      <div class="msg-text">${esc(m.text)}</div>
+      <div class="msg-bottom">
+        <span class="msg-time">${timeStr}</span>
+        <button class="upvote-btn ${voted ? 'voted' : ''}" onclick="upvote('${m.id}')">
+          <span class="arrow">&uarr;</span> ${m.upvotes || 0}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function setSort(mode) {
+  sortMode = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === mode));
+  render();
+}
+
+async function sendMessage() {
+  const nameInput = document.getElementById('nameInput');
+  const textInput = document.getElementById('textInput');
+  const topicSelect = document.getElementById('topicSelect');
+  const btn = document.getElementById('sendBtn');
+
+  const text = textInput.value.trim();
+  if (!text) return;
+
+  btn.disabled = true;
+  const name = nameInput.value.trim();
+  localStorage.setItem('cb3name', name);
+
+  await fetch('/api/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name || 'Anonymous', text, topic: topicSelect.value })
+  });
+
+  textInput.value = '';
+  document.getElementById('charCount').textContent = '0';
+  btn.disabled = false;
+  textInput.focus();
+}
+
+async function upvote(id) {
+  await fetch(`/api/messages/${id}/upvote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ voterId: VOTER_ID })
+  });
+}
+
+document.getElementById('textInput').addEventListener('input', e => {
+  document.getElementById('charCount').textContent = e.target.value.length;
+});
+
+document.getElementById('textInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendMessage();
+});
+</script>
+</body>
+</html>
